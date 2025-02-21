@@ -1,33 +1,44 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-require('dotenv').config();
+import express from "express";
 
-// Import routes
-const vehicleRoutes = require('./routes/vehicleRoutes');
-const authRoutes = require('./routes/authRoutes');
+import dotenv from "dotenv";
+import morgan from "morgan";
+import { connectDB } from "./config/db.js";
+import chalk from 'chalk';
+import authRoutes from "./routes/authRoute.js";
+import categoryRoutes from "./routes/categoryRoutes.js";
+import carRoutes from "./routes/carRoutes.js";
+import cors from "cors";
 
-// Initialize app
+//configure env
+dotenv.config();
+
+//databse config
+connectDB();
+
+//rest object
 const app = express();
 
-// Middleware
-app.use(express.json());
+//middelwares
 app.use(cors());
+app.use(express.json());
+app.use(morgan("dev"));
 
-// Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/vehicles', vehicleRoutes);
+//routes
+app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/category", categoryRoutes);
+app.use("/api/v1/car", carRoutes);
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-})
-.then(() => console.log("MongoDB connected"))
-.catch((err) => console.log(err));
+//rest api
+app.get("/", (req, res) => {
+  res.send("<h1>Welcome to ecommerce app</h1>");
+});
 
-// Server Setup
-const PORT = process.env.PORT || 5000;
+//PORT
+const PORT = process.env.PORT || 8080;
+
+// Run listen
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+  console.log(
+    chalk.bgCyan.white(`Server Running on ${process.env.DEV_MODE} mode on port ${PORT}`)
+  );
 });
